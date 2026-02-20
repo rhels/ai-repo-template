@@ -39,3 +39,12 @@
 - Removed old `tests/README.md` (replaced by per-layer structure)
 
 **Why:** Konda specified that agents must validate locally (Docker), in a lab cluster (OKD), and post-merge (Argo CD) before and after changes. This creates a layered defense against failures at each stage.
+
+## 2026-02-20 — Multi-persona enrichment protocol
+
+**Agent:** Tesla ⚡
+**What changed:**
+- AGENTS.md: enrichment phase now requires QA Review and SRE Review sections
+- issue-ready-gate.yml: CI validates QA Review and Validation Plan sections
+
+**Why:** Konda directed multi-persona review: the implementing agent must think as QA (testability, TDD, edge cases) and SRE (SLOs, runbooks, monitoring) before writing code. V1 is "one agent, multiple hats." V2 (future, at scale) will use dedicated QA/SRE agents.

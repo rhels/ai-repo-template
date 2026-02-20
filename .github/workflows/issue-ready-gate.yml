@@ -19,6 +19,8 @@ jobs:
               { name: 'Problem Definition', pattern: /###?\s*Problem Definition/i },
               { name: 'Scope & Constraints', pattern: /###?\s*Scope/i },
               { name: 'Acceptance Criteria', pattern: /###?\s*Acceptance Criteria/i },
+              { name: 'QA Review', pattern: /###?\s*.*QA Review/i },
+              { name: 'Validation Plan', pattern: /###?\s*Validation Plan/i },
             ];
 
             const missing = [];

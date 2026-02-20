@@ -117,8 +117,8 @@ When you pick up an issue labeled `triage`:
 - Check tests, logs, CI history for signals
 - Understand the problem before proposing a solution
 
-### Step 2: Enrich the issue
-Edit the issue body to add these sections:
+### Step 2: Enrich the issue (Multi-Persona Review)
+Edit the issue body to add these sections. You must think from **three perspectives** before writing code:
 
 ```markdown
 ---
@@ -134,9 +134,22 @@ Edit the issue body to add these sections:
 - [ ] <verifiable criterion 1>
 - [ ] <verifiable criterion 2>
 
+### 🎩 QA Review (Testability & TDD)
+- **Failing tests to write first:** <what tests prove this works>
+- **Edge cases:** <what could break>
+- **Regression risk:** <what existing behavior could be affected>
+
+### 🎩 SRE Review (Observability & Operations)
+- **SLO impact:** <does this affect availability, latency, error rate?>
+- **Runbook updates:** <any new failure modes to document?>
+- **Monitoring:** <new alerts, dashboards, or log patterns needed?>
+- *(Skip if change is docs-only or has no operational impact)*
+
 ### Validation Plan
-<how you will prove the fix works>
+<how you will prove the fix works — reference the 3 validation layers>
 ```
+
+**Why multi-persona?** Thinking like QA catches bugs before they exist. Thinking like SRE prevents 2AM incidents. The implementing agent owns all three hats (V1). Future V2: dedicated QA/SRE agents auto-comment on issues.
 
 ### Step 3: Comment your analysis
 Add a comment: "I've analyzed this issue. Here's my understanding: [summary]. Proceeding with implementation unless corrected."
