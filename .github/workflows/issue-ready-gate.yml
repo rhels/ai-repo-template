@@ -1,0 +1,63 @@
+name: Issue Ready Gate
+
+on:
+  issues:
+    types: [labeled]
+
+jobs:
+  validate-enrichment:
+    if: github.event.label.name == 'agent-ready'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check issue enrichment structure
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = context.payload.issue.body || '';
+
+            const requiredSections = [
+              { name: 'Problem Definition', pattern: /###?\s*Problem Definition/i },
+              { name: 'Scope & Constraints', pattern: /###?\s*Scope/i },
+              { name: 'Acceptance Criteria', pattern: /###?\s*Acceptance Criteria/i },
+            ];
+
+            const missing = [];
+            for (const section of requiredSections) {
+              if (!section.pattern.test(body)) {
+                missing.push(section.name);
+              }
+            }
+
+            // Check acceptance criteria has at least one item
+            const acMatch = body.match(/###?\s*Acceptance Criteria[\s\S]*?(?=###|$)/i);
+            if (acMatch && !/- \[[ x]\]/.test(acMatch[0])) {
+              missing.push('Acceptance Criteria (needs at least one checklist item)');
+            }
+
+            if (missing.length > 0) {
+              // Remove the label and comment
+              await github.rest.issues.removeLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                name: 'agent-ready'
+              }).catch(() => {});
+
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                labels: ['triage']
+              });
+
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: `⚠️ **Issue not ready for implementation.** Missing sections:\n\n${missing.map(m => '- ' + m).join('\n')}\n\nPlease enrich the issue with the required sections before applying \`agent-ready\`.`
+              });
+
+              core.setFailed(`Missing sections: ${missing.join(', ')}`);
+            } else {
+              console.log('✅ Issue meets agent-ready structure requirements');
+            }

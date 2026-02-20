@@ -107,6 +107,50 @@ Format: `memory/failures/YYYY-MM-DD-<short-title>.md`
 
 ---
 
+## Issue Lifecycle: Enrichment → Acceptance → Implementation
+
+When you pick up an issue labeled `triage`:
+
+### Step 1: Investigate
+- Read `MEMORY.md` and `memory/failures/` for related context
+- Inspect the codebase: grep for relevant code, check recent commits
+- Check tests, logs, CI history for signals
+- Understand the problem before proposing a solution
+
+### Step 2: Enrich the issue
+Edit the issue body to add these sections:
+
+```markdown
+---
+## Agent Enrichment (added by <your-name>)
+
+### Problem Definition
+<what you found after inspecting code/logs/tests>
+
+### Scope & Constraints
+<what's in scope, what's out, what constraints exist>
+
+### Acceptance Criteria
+- [ ] <verifiable criterion 1>
+- [ ] <verifiable criterion 2>
+
+### Validation Plan
+<how you will prove the fix works>
+```
+
+### Step 3: Comment your analysis
+Add a comment: "I've analyzed this issue. Here's my understanding: [summary]. Proceeding with implementation unless corrected."
+
+This gives humans a checkpoint to intervene if the analysis is wrong.
+
+### Step 4: Apply `agent-ready` label
+CI will validate the enrichment structure. If it passes, proceed to implementation.
+
+### Step 5: Implement
+You already have full context from the enrichment phase. Build, test, submit PR.
+
+---
+
 ## Before You Change Anything
 
 1. **Check memory first.** Someone may have already tried what you're about to do.

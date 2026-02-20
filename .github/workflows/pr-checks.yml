@@ -1,0 +1,81 @@
+name: PR Checks
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  changelog-check:
+    name: Changelog Updated
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check memory/changelog.md is in diff
+        run: |
+          CHANGED=$(git diff --name-only origin/main...HEAD)
+          if echo "$CHANGED" | grep -q "memory/changelog.md"; then
+            echo "✅ memory/changelog.md is updated"
+          else
+            echo "❌ memory/changelog.md was NOT modified in this PR."
+            echo "Every PR must include a changelog entry. See AGENTS.md for format."
+            exit 1
+          fi
+
+  pr-body-check:
+    name: PR Body Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate PR body has required sections
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = context.payload.pull_request.body || '';
+
+            const checks = [
+              { name: 'Summary section', pattern: /##\s*Summary/i },
+              { name: 'Validation Evidence section', pattern: /##\s*Validation Evidence/i },
+              { name: 'Memory Updates section', pattern: /##\s*Memory Updates/i },
+              { name: 'Issue link (Closes #N)', pattern: /Closes\s+#\d+/i },
+            ];
+
+            const missing = [];
+            for (const check of checks) {
+              if (!check.pattern.test(body)) {
+                missing.push(check.name);
+              }
+            }
+
+            if (missing.length > 0) {
+              core.setFailed(`PR body missing: ${missing.join(', ')}. Please use the PR template.`);
+            } else {
+              console.log('✅ PR body has all required sections');
+            }
+
+  memory-lint:
+    name: Memory Structure
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate structure
+        run: |
+          PASS=true
+          for f in AGENTS.md MEMORY.md memory/changelog.md; do
+            if [ ! -f "$f" ]; then echo "❌ $f missing"; PASS=false; else echo "✅ $f exists"; fi
+          done
+          for d in memory/decisions memory/failures; do
+            if [ ! -d "$d" ]; then echo "❌ $d missing"; PASS=false; else echo "✅ $d exists"; fi
+          done
+          $PASS || exit 1
+
+      - name: Check MEMORY.md line count
+        run: |
+          LINES=$(wc -l < MEMORY.md)
+          if [ "$LINES" -gt 500 ]; then
+            echo "❌ MEMORY.md is $LINES lines (limit: 500). Prune it."
+            exit 1
+          fi
+          echo "✅ MEMORY.md is $LINES lines (limit: 500)"
