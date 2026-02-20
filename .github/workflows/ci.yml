@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  memory-lint:
+    name: Memory Structure Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate AGENTS.md exists
+        run: test -f AGENTS.md || { echo "❌ AGENTS.md is missing"; exit 1; }
+
+      - name: Validate MEMORY.md exists
+        run: test -f MEMORY.md || { echo "❌ MEMORY.md is missing"; exit 1; }
+
+      - name: Validate memory structure
+        run: |
+          test -f memory/changelog.md || { echo "❌ memory/changelog.md is missing"; exit 1; }
+          test -d memory/decisions || { echo "❌ memory/decisions/ is missing"; exit 1; }
+          test -d memory/failures || { echo "❌ memory/failures/ is missing"; exit 1; }
+          echo "✅ Memory structure valid"
+
+      - name: Check MEMORY.md line count
+        run: |
+          LINES=$(wc -l < MEMORY.md)
+          if [ "$LINES" -gt 500 ]; then
+            echo "⚠️  MEMORY.md is $LINES lines (limit: 500). Please prune."
+            exit 1
+          fi
+          echo "✅ MEMORY.md is $LINES lines (limit: 500)"
+
+  yaml-lint:
+    name: YAML Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install yamllint
+        run: pip install yamllint
+      - name: Lint YAML files
+        run: yamllint -d relaxed . || true
+
+  # TEMPLATE: Add your project-specific CI jobs below
+  # test:
+  #   name: Tests
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Run tests
+  #       run: make test
