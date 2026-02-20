@@ -28,3 +28,14 @@
 - Separate triager agents create handoff context loss — implementing agent should own enrichment
 - Static structural checks (regex) cover 80% of validation value at 0% LLM cost
 - The acceptance gate (`agent-ready` label + CI check) gives humans an intervention checkpoint
+
+## 2026-02-20 — Added layered validation model
+
+**Agent:** Tesla ⚡
+**What changed:**
+- Added 3-layer validation section to AGENTS.md (Local → Lab → Post-merge)
+- Updated PR template with per-layer validation evidence sections
+- Created `tests/local/`, `tests/integration/`, `tests/post-deploy/` directories with READMEs
+- Removed old `tests/README.md` (replaced by per-layer structure)
+
+**Why:** Konda specified that agents must validate locally (Docker), in a lab cluster (OKD), and post-merge (Argo CD) before and after changes. This creates a layered defense against failures at each stage.

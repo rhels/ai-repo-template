@@ -12,11 +12,21 @@ Closes #
 
 ## Validation Evidence
 
-<!-- Machine-verifiable proof that this works. Required. -->
+<!-- Machine-verifiable proof that this works. Required. Fill in layers that apply. -->
 
-- **CI run:** <!-- link to passing GitHub Actions run -->
-- **Tests:** <!-- which tests cover this change, or paste output -->
-- **Manual verification:** <!-- if applicable, what you checked and the result -->
+### Layer 1: Local
+- **Build:** <!-- docker build output, make build, or N/A -->
+- **Tests:** <!-- test output or link -->
+- **Lint:** <!-- clean or N/A -->
+
+### Layer 2: Lab Cluster
+- **Deployment:** <!-- pod status, rollout output, or N/A for non-deployable changes -->
+- **Health check:** <!-- route/endpoint HTTP status, or N/A -->
+- **Integration tests:** <!-- output or link, or N/A -->
+
+### Layer 3: Post-Merge (filled after merge)
+- **Sync status:** <!-- Argo CD status, or N/A -->
+- **Post-deploy check:** <!-- verification output, or N/A -->
 
 ## Memory Updates
 

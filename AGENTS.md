@@ -151,6 +151,60 @@ You already have full context from the enrichment phase. Build, test, submit PR.
 
 ---
 
+## Validation Layers
+
+Every change must pass through layered validation before submission. The depth depends on the change type.
+
+### Layer 1: Local (Agent VM)
+Run before committing. Fast feedback.
+
+```bash
+# TEMPLATE: Replace with your project's local checks
+docker build -t <image> .                    # Build succeeds
+docker run --rm <image> <smoke-test-cmd>     # Basic runtime check
+make test                                    # Unit tests pass
+make lint                                    # Linting clean
+```
+
+Place local test scripts in `tests/local/`.
+
+### Layer 2: Lab Cluster (Real Environment)
+Deploy to a lab/staging environment and verify. Run before opening a PR.
+
+```bash
+# TEMPLATE: Replace with your project's lab deployment
+oc apply -k <path> -n <test-namespace>       # Deploy to lab
+oc rollout status deploy/<name> --timeout=300s
+curl -k https://<route>                      # Health check
+./tests/integration/verify.sh                # Integration tests
+```
+
+Place integration test scripts in `tests/integration/`.
+
+**Validation evidence from this layer is required in the PR.** Include pod status, route health checks, and test output.
+
+### Layer 3: Post-Merge (Production/GitOps)
+After PR merge, verify the change deployed correctly to the target environment.
+
+```bash
+# TEMPLATE: Replace with your project's post-merge checks
+oc get application <app> -o wide             # Argo CD sync status
+./tests/post-deploy/verify.sh                # Post-deploy smoke tests
+```
+
+Place post-deploy scripts in `tests/post-deploy/`.
+
+### When to use each layer
+
+| Change type | Layer 1 (Local) | Layer 2 (Lab) | Layer 3 (Post-merge) |
+|-------------|:-:|:-:|:-:|
+| Code / logic | ✅ | ✅ | ✅ |
+| K8s manifests | ✅ dry-run | ✅ | ✅ |
+| Documentation | ✅ lint | — | — |
+| Memory only | — | — | — |
+
+---
+
 ## Before You Change Anything
 
 1. **Check memory first.** Someone may have already tried what you're about to do.
